@@ -1,0 +1,15 @@
+# Arquivos de configuração sensíveis
+.env
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+venv/
+env/
+ENV/
+
+# Streamlit
+.streamlit/

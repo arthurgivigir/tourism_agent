@@ -10,6 +10,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain, SequentialChain
 
 import logging
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -28,10 +29,14 @@ class TravelTemplate:
             •	The type of transport between each location
             •	Activities that are either free or low-cost
             •	Tips to save money along the way (if relevant)
+            •   Any necessary precautions or considerations for safety and comfort
+            •   Which bus or metro lines to take, if applicable
 
         If the user doesn’t specify a starting location, assume a logical one and provide a concrete address. The goal is to create an enjoyable and achievable plan with simplicity and spontaneity in mind.
 
         Return only the list with no extra commentary.
+
+        Answer the user in portuguese, using a friendly and engaging tone.
         """
 
         self.human_template = """
@@ -113,28 +118,23 @@ class Agent:
         self.temperature = temperature
         self.logger = logging.getLogger(__name__)
         self.chat_model = ChatOpenAI(model=self.model,
-                                     temperature=self.temperature,
-                                     openai_api_key=self.open_ai_key)
+                         temperature=self.temperature,
+                         openai_api_key=self.open_ai_key,
+                         openai_organization="org-RFtOelfLtrbxfp1wU2xF2Nml")
 
     def get_tips(self, request):
         travel_prompt = TravelTemplate()
-        coordinates_prompt = MappingTemplate()
         
         parser = LLMChain(
             llm=self.chat_model,
             prompt=travel_prompt.chat_prompt,
             output_key="itinerary"
         )
-        coordinates_converter = LLMChain(
-            llm=self.chat_model,
-            prompt= coordinates_prompt.chat_prompt,
-            output_key="coordinates"
-        )
 
         chain = SequentialChain(
-            chains=[parser, coordinates_converter],
+            chains=[parser],
             input_variables=["request"],
-            output_variables=["itinerary", "coordinates"],
+            output_variables=["itinerary"],
             verbose=True
         )
         return chain(
